@@ -1,0 +1,572 @@
+---
+title: "Taller Pruebas de Hipótesis - Potencia"
+author: "Sergio Martínez"
+date: "24/5/2021"
+output: html_document
+---
+
+<div style="text-align: justify">
+__**1****.** Una muestra aleatoria de $n = 35$ observaciones de una población cuantitativa produjo una media de $\overline{x}=2.4$ y una desviación estándar $\sigma = 0.29$. Suponga que el objetivo de su investigación es demostrar que la media poblacional $\mu$ excede de 2.3.__   
+  
+  
+*Solución:*  
+Resumiendo el enunciado tenemos:  
+
+*   $n=35$  
+*   $\overline{x}= 2.4$  
+*   $\sigma= 0.29$  
+
+Objetivo: Media poblacional excede 2.3
+
+    
++ __**a)** Dé la hipótesis nula y alternativa para la prueba.__ 
+
+$$
+\left\{
+\begin{array}{ll}
+H_{0}: &  \mu=2.3\\
+H_{1}: & \mu>2.3
+\end{array}
+\right.
+$$
+  
++ __**b)** Encuentre el valor crítico de $\overline{x}$ usado para rechazar $H_{0}$.__  
+    
+Tenemos que : 
+$$ \overline{X} \sim N(\mu_{0}, \frac{s}{\sqrt{n}}) $$
+Entonces:  
+$$ \overline{X} \sim N( 2.3, \frac{0.29}{\sqrt{35}}) $$
+Rechazamos $H_{0}$ cuando $\overline{X}> Cuantil \: \alpha$ de la distribución de $\overline{X}$.
+
+
+Suponiendo que $\alpha=0.05$ entonces el valor crítico de $\overline{x}$ :  
+
+```{r}
+valorCritico <- qnorm(0.95, 2.3, 0.29/sqrt(35))
+valorCritico
+```
+
++ __**c)** Calcule $\beta = P$ (No rechazar $H_{0}$ cuando $\mu= 2.4$).__    
+
+$$\beta= P(No \: rechazar \; H_{0}| \: \mu= 2.4)$$
+Entonces, aceptamos $H_{0}$ cuando $\overline{X} < 2.38$ es decir, 
+$$\beta= P(No \:rechazar \: H_{0}| \mu= 2.4)= P(\overline{X}<2.38|\mu=2.4)$$
+```{r}
+beta <- pnorm(2.38, 2.4, 0.29/sqrt(35))
+beta
+```
+$$\beta=0.342$$
+
++ __**d)** Repita el cálculo de $\beta$ para $\mu = 2.3, 2.5$ y $2.6$.__  
+  
+```{r}
+mu <- c(2.3, 2.4, 2.5, 2.6)
+
+beta <- pnorm(2.38, mu, 0.29/sqrt(35))
+round(beta, 3)
+
+```
+ 
+| $\mu$ | $\beta$ |
+|:----: |:------: |
+|  2.3  |  0.949  |
+|  2.4  |  0.342  |
+|  2.5  |  0.007  |
+|  2.6  |  0.000  |
+
+  
++ __**e)** Use los valores de $\beta$ de los incisos *c)* y *d)* para graficar la curva de potencia para la prueba.__    
+
+```{r}
+plot(mu, 1 - beta, type = "l",
+     main="Curva de potencia",
+     sub = "Punto 1",
+     col = "blue",
+     lwd = 2)
+
+```
+  
+  
+
+
+__**2****.** Supóngase que en cierta ciudad sólo hay dos estaciones de televisión: el canal 6 y el canal 10. Se piensa que para las noticias de la tarde el auditorio se encuentra dividido en partes iguales para ambos canales. Una compañía se interesa en probar la afirmación de que la proporción de televidentes para las noticias de la tarde es igual a $0.5$ para ambos canales. La compañía no posee ninguna información a priori para sugerir una alternativa unilateral por lo que se decide probar la hipótesis nula:__  
+
+
+$$
+\left\{
+\begin{array}{ll}
+H_{0}: &  P=0.5\\
+H_{1}: &  P\neq 0.5
+\end{array}
+\right.
+$$
+
+__La compañía encuesta a 18 residentes seleccionados al azar y pregunta qué canal prefieren para ver las  noticias de la tarde. El número $X$ indica que el canal 6 es el que se ha seleccionado; Se proponen las siguientes dos pruebas:__  
+
+
+* **Prueba A:** $Rechazar \: H_{0}$ sí $X\leq 4 \: o\: X \geq 14$.  
+
+* **Prueba B:** $Rechazar \:H_{0}$ sí $X\leq 5 \:o \: X \geq 13$.  
+
+__Si la compañía piensa tolerar un tamaño máximo de $0.1$ para el error de *tipo I*, determinar la mejor prueba a emplear para decidir entre $H_{0}$ y $H_{1}$.__   
+
+*Solución:*  
+Resumiendo el enunciado tenemos:  
+
+* $n=18$  
+* $\alpha=0.1$  
+* $X=$ Cantidad de personas que ve el canal 6 y sigue una distribución binomial de parámetros $n=18$ y $p$. 
+
+
+Sí $p=0.5$ entonces para la prueba A: 
+
+$$ \alpha_{A}= P(X \leq 4|p=0.5) + P(X \geq 14\:|\:p=0.5)= 0.0308 $$
+```{r}
+# alpha de la prueba A
+
+probs <- dbinom(15:19,18, 0.5)
+sum(probs)
+pbinom(13, 18, 0.5, lower.tail = F)
+
+alphaPruebaA <- pbinom(4, 18, 0.5) + 
+  pbinom(13, 18, 0.5, lower.tail = F) 
+
+# Se inicia en 13 la última expresión 
+#para que cuente el caso de x = 14
+```
+
+Para la prueba B:  
+$$ \alpha_{B}= P(X \leq 5|p=0.5) + P(X \geq 13|p=0.5)= 0.0962 $$
+```{r}
+alphaPruebaB <- pbinom(5, 18, 0.5) + 
+  pbinom(12, 18, 0.5, lower.tail = F) 
+# Se inicia en 12 la última expresión 
+# para que cuente el caso de x = 14
+```
+
+
+Ya que ambas pruebas tiene valores de $\alpha$ menores al tamaño máximo que puede tolerarse del error *tipo I*, se procede a comparar sus funciones de potencia, para decidir cuál es la mejor.  
+
+
+```{r}
+p <- seq(0.1, 0.9, by = 0.1)
+betaPruebaA <- 1 - (pbinom(4, 18, p) + 
+                      pbinom(13, 18, p, lower.tail = F))
+
+betaPruebaB <- 1 - (pbinom(5, 18, p) + 
+                      pbinom(12, 18, p, lower.tail = F))
+
+potenciaPruebaA <-   1 - betaPruebaA
+potenciaPruebaB <-   1 - betaPruebaB
+```
+
+| $P$     | 0.1  | 0.2  |  0.3 | 0.4  | 0.5  |  0.6 | 0.7 | 0.8     | 0.9|               
+|------:  | :---:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+|Potencia A|0.9718|0.7163|0.3326|0.0954|0.0308|0.0954|0.3326|0.7163|0.9718|
+|Potencia B|0.9935|0.8670|0.5346|0.2145|0.0962|0.2145|0.5346|0.8670|0.9935|
+
+
+Gráficamente tenemos:   
+
+```{r}
+plot(p, potenciaPruebaA, col = "red", type = "l", lwd= 2, main = "Funciones de potencia")
+lines(p, potenciaPruebaB, col = "blue", type = "l", lwd= 2 )
+```
+
+
+Del gráfico y la tabla anterior se observa que para cualquier valor de P, la potencia de la prueba B es mayor que la de la prueba A. De acuerdo con lo anterior, la prueba B es uniformemente más potente que la prueba A y es la mejor a utilizar para probar las hipótesis indicadas.  
+
+
+
+__**3****.** Los siguientes datos representan los tiempos de armado para 20 unidades seleccionadas aleatoriamente: 9.8, 10.4, 10.6, 9.6, 9.7, 9.9, 10.9, 11.1, 9.6, 10.2, 10.3, 9.6, 9.9, 11.2, 10.6, 9.8, 10.5, 10.1, 10.5, 9.7. Supóngase que el tiempo necesario para armar una unidad es una variable aleatoria normal con media $\mu$  y desviación estándar $\sigma = 0.6$ minutos. Con base en esta muestra:__ 
+
+
+*Solución:*  
+Resumiendo el enunciado tenemos que:  
+
+
+* $n=20$  
+* $X=\:Tiempo \:necesario \:para \: armar \: una \:unidad$.  
+* $X \sim N(\mu, \sigma= 0.6)$  
+
+
+
++ __**a)** ¿Existe alguna razón para creer, a un nivel del 0.05, que el tiempo de armado promedio es mayor de 10 minutos?__  
+
+
+**Sí $\alpha=0.05$ **  
+
+Tenemos que:  
+
+$$
+\left\{
+\begin{array}{ll}
+H_{0}: &  \mu=10\\
+H_{1}: &  \mu>10
+\end{array}
+\right.
+$$
+```{r}
+sigma <- 0.6
+tiemposArmado <- c(9.8, 10.4, 10.6, 9.6, 9.7, 9.9, 10.9, 11.1, 9.6, 10.2, 10.3, 9.6, 9.9, 11.2, 10.6, 9.8, 10.5, 10.1, 10.5, 9.7)
+prom <- mean(tiemposArmado)
+```
+
+El estadístico de prueba es $Z \sim N(0,1)$, Entonces:  
+
+$$z={\frac{\overline{x}-\mu_{0}}{\sigma/\sqrt{n}}}={\frac{10.2- 10 }{0.6/\sqrt{20}}}= 1.4907$$
+
+```{r}
+# valor observado del estadístico de prueba
+h0 <- 10
+z <- (prom - h0)/(sigma/sqrt(20));z
+```
+
+La región crítica:  
+
+```{r}
+# valor crítico
+
+valorCritico <- qnorm(0.95);valorCritico
+
+# valor-p
+
+valorP <- 1 - pnorm(z)
+
+```
+
+Con los resultados obtenidos, podemos decir que:  
+
+$$ El \: valor-P \: es \: P(Z>1.4907)=0.068$$.  
+
+
+Entonces no se rechaza $H_{0}$, es decir, que con base en la muestra, no existe suficiente evidencia para rechazar la hipótesis de que el tiempo promedio necesario para armar una unidad es de 10 minutos.   
+
+
++ __**b)** Si el verdadero tiempo promedio necesario para armar una unidad es de 10.3 minutos, ¿cuál es la probabilidad de rechazar la hipótesis nula?.__  
+
+$$P(Rechazar \: H_{0} \: |\: \mu=10.3)$$  
+  
+  
+En este caso se desea obtener la potencia de a prueba para detectar la falta de veracidad de $H_{0}$ cuando el verdadero valor es 10.3 minutos.  
+  
+  
+Entonces:  
+
+$$ \overline{X} \sim N(\mu_{0}, \frac{\sigma}{\sqrt{n}}) ==                     \overline{X} \sim N(10, \frac{0.6}{\sqrt{20}})$$
+El valor crítico de $\overline{x}$ es:
+
+```{r}
+# valor crítico de xBarra
+vcXbarra <- qnorm(0.95, 10, sigma/sqrt(20));vcXbarra
+```
+
+Donde $\beta$ :  
+
+$$\beta= P(\overline{x}<10.22 | \mu=10.3)= 0.2776 $$
+```{r}
+beta <- pnorm(10.22, 10.3, sigma/sqrt(20))
+```
+
+
+De esta forma la probabilidad de equivocarse al rechazar $H_{0}$ cuando la media es 10.3 minutos, es igual a 0.2776. Por lo tanto:  
+
+
+$$Potencia= 1-\beta= 0.7224$$  
+
+__**4****.** Suponga que usted observa un solo valor de una variable aleatoria cuya función de densidad está dada por $f(x;\theta)=\frac{1}{\theta}, 0<x<\theta$, y desea probar la hipótesis:__  
+
+
+$$ H_{0}: \theta = 20$$ 
+Contra la alternativa:  
+
+$$H_{1}:\theta = 15 $$
+__¿Cuál de las dos pruebas **a)** rechazar $H_{0}$ sí $x\leq 8$, o **b)** rechazar $H_{0}$ sí $x\geq8$ es la mejor para decidir entre las dos hipótesis?__  
+
+*Solución:*  
+Resumiendo el enunciado tenemos que:  
+
+
+* $f(x;\theta)=\frac{1}{\theta}$ ; $0<x<\theta$  
+
+$$
+\left\{
+\begin{array}{ll}
+H_{0}: &  \theta=20\\
+H_{1}: &  \theta=15
+\end{array}
+\right.
+$$
+    
+    
+* **Prueba A:** $Rechazar \: H_{0} \:sí \: x\leq 8$.    
+
+* **Prueba B:** $Rechazar \: H_{0} \: sí\: x > 8$.
+
+
+La mejor prueba para $H_{0}$ contra $H$, es aquella que tenga el tamaño más pequeño del error *tipo II*
+
+
+$$P(No \: rechazar \: H_{0}\:|\:H_{0}\: es\: falsa)$$
+
+* **Prueba A:** $P(x>8|\theta=15)=1- P(x \leq 8|\theta=15)=                                   1-\frac{8}{15}= 0.466$  
+
+* **Prueba B:** $P(x>8|\theta=15)=\frac{8}{15}= 0.533$  
+
+$$ \begin{equation}
+    F(x;\theta) = \int_{0}^{x} \frac{1}{\theta} dx                               =\frac{1}{\theta} |_{0}^{x} = \frac{x}{\theta}
+    \end{equation}                                                          $$
+Entonces la mejor prueba es la A.
+
+
+
+__**5****.** Se sabe que la proporción de artículos defectuosos en un proceso de manufactura es de 0.15. El proceso  se vigila en forma periódica tomando muestras aleatorias de tamaño 20 e inspeccionando las unidades.  SI se encuentran dos o mas unidades defectuosas en la muestra, el proceso se detiene y se considera como “fuera de control”:__  
+
+
+*Solución:*  
+Resumiendo el enunciado tenemos:  
+
+* $n=20$  
+
+
+*Se rechaza si 2 o más unidades de encuentran defectuosas, es decir que no se rechaza si se encuentra 1 ó menos*
+
+
++ __**a)** Enunciar la hipítesis nula y alternativa apropiadas.__  
+$$
+\left\{
+\begin{array}{ll}
+H_{0}: &  p=0.05\\
+H_{1}: &  p>0.05
+\end{array}
+\right.
+$$
+  
+  
++ __**b)** Obtener la probabilidad del error *Tipo I*.__  
+
+
+* $P(Rechazar \: H_{0}\: | \: H_{0}\: es \: verdadera)$.  
+
+* $X=Número\: de \:unidades\: defectuosas$.  
+
+* $X \sim Bin(20, p=0.05)$.  
+
+
+```{r}
+pbinom(1, size = 20,prob = 0.05, lower.tail = F)
+```
+
+$$\alpha = P(Rechazar\:H_{0}\:|\:H_{0}\:es \:verdadera)= P(x \geq 2)= 0.2642$$.  
+
+
++ __**c)** Obtener y graficar la función de potencia para los siguientes valores alternativos de la proporción de artículos defectuosos: 0.06, 0.08, 0.1, 0.15, 0.2 y 0.25.__  
+
+$Potencia= 1- \beta$, Donde $\beta$ es la probabilidad del error *tipo II*.  
+
+$\beta= P(No \:rechazar\: H_{0}\:|\:H_{0}\: es\: falsa)$.  
+
+Supongamos los siguientes posibles valores de p:
+
+```{r}
+pH1 <- c(0.06, 0.08, 0.1, 0.15, 0.2, 0.25)
+```
+
+Gráficamente tenemos que: 
+
+```{r}
+beta <- pbinom(1, size = 20,prob = pH1)
+potencia <- 1 - beta
+
+plot(pH1, potencia, type = "l", 
+     main = "Función de potencia",
+     sub  = "Punto 5",
+     lwd  = 2,
+     col  = "orange",
+     ylab = "Potencia", 
+     xlab = "P", 
+     ylim = c(0, 1))
+```
+
+
++ __**d)** Compárense sus respuestas con las partes b) y c) para el caso en el que se juzga al proceso como fuera de control cuando se encuentran tres o más defectuosos.__  
+
+Sabemos que el proceso está fuera de control cuando se encuntran 3 o más defectuosos, entonces:  
+
+$$\alpha= P(Rechazar\: H_{0}\:|\:H_{0}\: es \:verdadera)= P(x\geq 3)= 0.0755$$  
+```{r}
+pbinom(2, size = 20,prob = 0.05, lower.tail = F)
+```
+```{r}
+pH1 <- c(0.06, 0.08, 0.1, 0.15, 0.2, 0.25)
+beta_2 <- pbinom(2, size = 20,prob = pH1)
+potencia_2 <- 1 - beta_2
+
+plot(pH1, potencia_2, type = "l", 
+     main = "Función de potencia",
+     sub = "Punto 5b",
+     ylab = "Potencia", 
+     xlab = "P", 
+     col= "blue", 
+     lwd= 2, 
+     ylim = c(0, 1))
+
+```
+
+
+__**6****.** La cantidad promedio que se coloca en un recipiente en un proceso de llenado se supone que es de 20 onzas. En forma periódica, se escogen al azar 25 recipientes y el contenido de cada uno de estos se pesa. Se juzga al proceso como fuera de control cuando la media muestral $\overline{x}$ es menor o igual a 19.8 o mayor o  igual a 20.2 onzas. Se supone que la cantidad que se vacía en cada recipiente se encuentra aproximada, en forma adecuada, por una distribución normal con una desviación estándar de 0.5 onzas:__  
+
+*Solución:*  
+Resumiendo el enunciado tenemos que:  
+
+* $n=25$  
+
+* $\overline{x}\geq 20.2$ ó $\overline{x}\leq 19.8$  
+
+Se supone que:
+$$ X \sim N(\mu, \sigma=0.5)$$  
+
++ __**a)** Enúnciese la hipótesis nula y alternativa que son propias para esta situación.__  
+
+Sí $X \sim N(\mu, \sigma=0.5)$ Entonces:  
+
+$$\overline{X}\sim N(\mu, \sigma= \frac{0.5}{\sqrt{25}})$$
+
+
++ __**b)** Obtener la probabilidad del error *tipo I*.__  
+
+Tenemos que:  
+
+$$P(Rechazar\: H_{0}\:|\:H_{0} \:es \:verdadera)$$
+Entonces:  
+
+$$ P(\overline{X} \leq 19.8\: ó \:\overline{X}\geq 20.2|\mu=20)= P(\overline{X} \leq 19.8|\mu=20)+P(\overline{X} \geq 20.2|\mu=20)=0.0455 $$  
+
+```{r}
+pnorm(19.8, mean = 20, sd = 0.5/sqrt(25)) + pnorm(20.2, mean = 20, sd = 0.5/sqrt(25), lower.tail = F)
+
+```
+
+
+
++ __**c)** Obtener y graficar la función de potencia para los siguientes valores medios de llenado: 19.5, 19.6, 19.7, 19.8, 19.9 y 20, 20.1, 20.2, 20.3, 20.4 y 20.5.__  
+
+Tenemos que:  
+$Potencia= 1- \beta$ , Donde $\beta$ es la probabilidad del error *tipo II*.  
+
+$$\beta= P(No\: rechazar\:H_{0}\:|\:H_{0}\: es\: falsa)\\                           \beta= P(19.8\leq \overline{X} \leq 20.2\: |\:H_{0} \:es \:falsa)$$
+
+```{r}
+muH1 <- c(19.5, 19.6, 19.7, 19.8, 19.9, 20, 20.1, 20.2, 20.3, 20.4, 20.5)
+beta <- pnorm(20.2, mean = muH1, sd = 0.5/sqrt(25)) - pnorm(19.8, mean = muH1, sd = 0.5/sqrt(25))
+potencia <- 1 - beta
+plot(muH1, potencia, type = "l", 
+     main = "Función de potencia",
+     sub  = "Punto 6",
+     lwd  = 2,
+     col  = "#009933",
+     ylab = "Potencia", 
+     xlab = "P", 
+     ylim = c(0, 1))
+
+```
+
++ __**d)** Como una prueba alternativa, considérese el rechazo de $H_{0}$ cuando $\overline{x} \leq 19.75$ o cuando $\overline{x} \geq 20.25$ Si el tamaño máximo del error *tipo I* es de 0.05. ¿Cúal de las dos pruebas es la mejor?.__  
+
+La mejor prueba es la que tenga mayor potencia; Sea:
+
+* **Prueba A=** $Rechazar \: Sí \:\: \overline{x}<19.8$ ó $\overline{x}>20.2$.  
+* **Prueba B=** $Rechazar \: Sí \:\: \overline{x}<19.75$ ó $\overline{x}>20.5$.  
+
+```{r}
+muH1_2 <- c(19.5, 19.6, 19.7, 19.8, 19.9, 20, 20.1, 20.2, 20.3, 20.4, 20.5)
+beta <- pnorm(20.25, mean = muH1, sd = 0.5/sqrt(25)) - pnorm(19.75, mean = muH1, sd = 0.5/sqrt(25))
+potencia_2 <- 1 - beta
+
+plot(muH1_2, potencia_2, type = "l",  
+     main = "Funciones de potencia",
+     sub = "comparación",
+     ylab = "Potencia", 
+     xlab = "P", 
+     ylim = c(0, 1), 
+     col = "#003300",
+     lwd = 2)
+lines(muH1, potencia, type = "l", col ="#009933",lwd=2)
+legend(19.5,0.4, c("Prueba A", "Prueba B"), col = c("#009933", "#003300"), lty = c(1,1), lwd= 4)
+
+```
+
+Por tanto, la prueba A es mejor.  
+
+__**7** **.** Con referencia al ejercicio 6, supóngase que el tamaño de la muestra se aumenta a 36 recipientes. Dados los mismos tamaños del error *tipo I* para las pruebas propuestas, obtener los nuevos valores críticos y comparar las funciones potencia de las dos pruebas.__   
+
+*Solución:*  
+Resumiendo el enunciado tenemos que:  
+
+
+Supongamos que el tamaño de muestra se aumenta a $n = 36$. Entonces para determinar los valores críticos primero recordemos los valores de $\alpha$ para cada una de las pruebas del punto anterior.  
+
+* **Prueba A:**  
+
+```{r}
+alphaPA <- pnorm(19.8, mean = 20, sd = 0.5/sqrt(25)) + pnorm(20.2, mean = 20, sd = 0.5/sqrt(25), lower.tail = F)
+
+```
+
+* **Prueba B:**  
+
+```{r}
+alphaPB <- pnorm(19.75, mean = 20, sd = 0.5/sqrt(25)) + pnorm(20.25, mean = 20, sd = 0.5/sqrt(25), lower.tail = F)
+
+```
+
+
+Entonces determinar los valores críticos equivale a buscar los percentiles de la distribución de $\overline{X}$ que mantienen los $\alpha$ ya determinados.  
+
+* **Prueba A:**  
+
+```{r}
+vc1PA <- qnorm(alphaPA/2, mean = 20, sd = 0.5/sqrt(36))
+vc2PA <- qnorm(alphaPA/2, mean = 20, sd = 0.5/sqrt(36), lower.tail = F)
+```
+
+* **Prueba B:**  
+
+```{r}
+vc1PB <- qnorm(alphaPB/2, mean = 20, sd = 0.5/sqrt(36))
+vc2PB <- qnorm(alphaPB/2, mean = 20, sd = 0.5/sqrt(36), lower.tail = F)
+```
+
+Ahora obtenemos los valores de potencia de cada una de las pruebas:  
+
+* **Prueba A:**
+
+```{r}
+muH1 <- c(19.5, 19.6, 19.7, 19.8, 19.9, 20, 20.1, 20.2, 20.3, 20.4, 20.5)
+beta <- pnorm(vc2PA, mean = muH1, sd = 0.5/sqrt(36)) - pnorm(vc1PA, mean = muH1, sd = 0.5/sqrt(36))
+potencia <- 1 - beta
+```
+
+
+* **Prueba B:**  
+
+```{r}
+muH1_2 <- c(19.5, 19.6, 19.7, 19.8, 19.9, 20, 20.1, 20.2, 20.3, 20.4, 20.5)
+beta <- pnorm(vc2PB, mean = muH1, sd = 0.5/sqrt(36)) - pnorm(vc1PB, mean = muH1, sd = 0.5/sqrt(36))
+potencia_2 <- 1 - beta
+```
+
+Gráficamente tenemos que:  
+
+```{r}
+plot(muH1_2, potencia_2, type = "l",  
+     main= "Función de potencia",
+     ylab = "Potencia", 
+     xlab = "P", 
+     ylim = c(0, 1), 
+     col = "red")
+lines(muH1, potencia, type = "l")
+legend(19.5,0.4, c("Prueba A", "Prueba B"), col = c("black", "red"), lty = c(1,1))
+```
+<div/>
+
